@@ -159,7 +159,7 @@ This sub-array feature is how breeds are managed, see class <code>Model</code></
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">create</span>:<span class="hljs-function"> -&gt;</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">create</span>: <span class="hljs-function">-&gt;</span></pre></div></div>
             
         </li>
         
@@ -218,7 +218,11 @@ array is unsorted, simply call <code>sortById</code> first, see <code>sortById</
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">setDefault</span>: <span class="hljs-function"><span class="hljs-params">(name, value)</span> -&gt;</span> <span class="hljs-property">@agentClass</span>::[name] = value; @</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">setDefault</span>: <span class="hljs-function"><span class="hljs-params">(name, value)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> name.match(<span class="hljs-regexp">/color/i</span>) <span class="hljs-keyword">and</span> u.isArray value
+      value = ColorMaps.Rgb.findClosestColor value...
+    <span class="hljs-property">@agentClass</span>::[name] = value <span class="hljs-comment"># ; @</span>
+  <span class="hljs-attribute">getDefault</span>: <span class="hljs-function"><span class="hljs-params">(name)</span> -&gt;</span> <span class="hljs-property">@agentClass</span>::[name]</pre></div></div>
             
         </li>
         
@@ -290,58 +294,6 @@ Breeds is a string of space separated names:
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>A generalized, but complex, flood fill, designed to work on any
-agentset type. To see a simpler version, look at the gridpath model.</p>
-<p>Floodfill arguments:</p>
-<ul>
-<li>aset: initial array of agents, often a single agent: [a]</li>
-<li>fCandidate(a, asetLast) -&gt; true if a is elegible to be added to the set</li>
-<li>fJoin(a, asetLast) -&gt; adds a to the agentset, often by setting a variable</li>
-<li>fNeighbors(a) -&gt; returns the neighbors of this agent</li>
-<li>asetLast: the array of the last set of agents to join the flood.</li>
-</ul>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">floodFill</span>: <span class="hljs-function"><span class="hljs-params">(aset, fCandidate, fJoin, fNeighbors, asetLast=[])</span> -&gt;</span>
-    floodFunc = <span class="hljs-property">@floodFillOnce</span>(aset, fCandidate, fJoin, fNeighbors, asetLast)
-    floodFunc = floodFunc() <span class="hljs-keyword">while</span> floodFunc</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p>Move one step forward in a floodfill.
-floodFillOnce() returns a function that performs the next step of the flood.
-This is useful if you want to watch your flood progress as an animation.</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">floodFillOnce</span>: <span class="hljs-function"><span class="hljs-params">(aset, fCandidate, fJoin, fNeighbors, asetLast=[])</span> -&gt;</span>
-    fJoin p, asetLast <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> aset
-    asetNext = []
-    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> aset
-      <span class="hljs-keyword">for</span> n <span class="hljs-keyword">in</span> fNeighbors(p) <span class="hljs-keyword">when</span> fCandidate n, aset
-        asetNext.push n <span class="hljs-keyword">if</span> asetNext.indexOf(n) &lt; <span class="hljs-number">0</span>
-    <span class="hljs-keyword">if</span> asetNext.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
-      <span class="hljs-literal">null</span>
-    <span class="hljs-keyword">else</span>
-      <span class="hljs-function"><span class="hljs-params">()</span> =&gt;</span> <span class="hljs-property">@floodFillOnce</span> asetNext, fCandidate, fJoin, fNeighbors, aset</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-16">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
               <p>Remove adjacent duplicates, by reference, in a sorted agentset.
 Use <code>sortById</code> first if agentset not sorted.</p>
 <pre><code>as = (AS.oneOf() <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">1.</span><span class="hljs-number">.4</span>]) <span class="hljs-comment"># 4 random agents w/ dups</span>
@@ -352,32 +304,32 @@ as.sortById().uniq() <span class="hljs-comment"># [{id:0,x:0,y:1}, {id:1,x:8,y:0
 </code></pre>
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">uniq</span>:<span class="hljs-function"> -&gt;</span> u.uniq(@)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">uniq</span>: <span class="hljs-function">-&gt;</span> u.uniq(@)</pre></div></div>
             
         </li>
         
         
-        <li id="section-17">
+        <li id="section-15">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+                <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>The static <code>ABM.AgentSet.asSet</code> as a method.
 Used by agentset methods creating new agentsets.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">asSet</span>: <span class="hljs-function"><span class="hljs-params">(a, setType = @)</span> -&gt;</span> AgentSet.asSet a, setType <span class="hljs-comment"># setType = AgentSet</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">asSet</span>: <span class="hljs-function"><span class="hljs-params">(a, setType = AgentSet)</span> -&gt;</span> AgentSet.asSet a, setType <span class="hljs-comment"># setType = AgentSet</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-18">
+        <li id="section-16">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
               <p>Similar to above but sorted via <code>id</code>.</p>
 
@@ -388,26 +340,26 @@ Used by agentset methods creating new agentsets.</p>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-17">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-17">&#182;</a>
               </div>
               <p>Return string representative of agentset.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"["</span>+(a.toString() <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> @).join(<span class="hljs-string">", "</span>)+<span class="hljs-string">"]"</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">toString</span>: <span class="hljs-function">-&gt;</span> <span class="hljs-string">"["</span>+(a.toString() <span class="hljs-keyword">for</span> a <span class="hljs-keyword">in</span> @).join(<span class="hljs-string">", "</span>)+<span class="hljs-string">"]"</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-20">
+        <li id="section-18">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <h3 id="property-utilities">Property Utilities</h3>
 <p>Property access, also useful for debugging<br></p>
@@ -417,11 +369,11 @@ Used by agentset methods creating new agentsets.</p>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>Return an array of a property of the agentset</p>
 <pre><code> AS.getProp <span class="hljs-string">"x"</span> <span class="hljs-comment"># [0, 8, 6, 1, 1]</span>
@@ -433,11 +385,11 @@ Used by agentset methods creating new agentsets.</p>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>Return an array of agents with the property equal to the given value</p>
 <pre><code>AS.getPropWith <span class="hljs-string">"x"</span>, <span class="hljs-number">1</span>
@@ -450,11 +402,11 @@ Used by agentset methods creating new agentsets.</p>
         </li>
         
         
-        <li id="section-23">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <p>Set the property of the agents to a given value.  If value
 is an array, its values will be used, indexed by agentSet’s index.
@@ -474,11 +426,11 @@ AS1.setProp <span class="hljs-string">"x"</span>, <span class="hljs-number">2</s
         </li>
         
         
-        <li id="section-24">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p>Get the agent with the min/max prop value in the agentset</p>
 <pre><code>min = AS.minProp <span class="hljs-string">"y"</span>  <span class="hljs-comment"># 0</span>
@@ -493,15 +445,48 @@ max = AS.maxProp <span class="hljs-string">"y"</span>  <span class="hljs-comment
         </li>
         
         
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <h3 id="array-utilities-often-from-util">Array Utilities, often from Util</h3>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>Randomize the agentset</p>
+<pre><code>AS.shuffle(); AS.getProp <span class="hljs-string">"id"</span> <span class="hljs-comment"># [3, 2, 1, 4, 5]</span>
+</code></pre>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">shuffle</span>: <span class="hljs-function">-&gt;</span> u.shuffle @</pre></div></div>
+            
+        </li>
+        
+        
         <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
-              <h3 id="array-utilities-often-from-util">Array Utilities, often from Util</h3>
-
+              <p>Sort the agentset by the agent’s <code>id</code>.</p>
+<pre><code>AS.shuffle();  AS.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [3, 2, 1, 4, 5]</span>
+AS.sortById(); AS.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [1, 2, 3, 4, 5]</span>
+</code></pre>
             </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">sortById</span>: <span class="hljs-function">-&gt;</span> u.sortBy @, <span class="hljs-string">"id"</span></pre></div></div>
             
         </li>
         
@@ -511,39 +496,6 @@ max = AS.maxProp <span class="hljs-string">"y"</span>  <span class="hljs-comment
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
-              <p>Randomize the agentset</p>
-<pre><code>AS.shuffle(); AS.getProp <span class="hljs-string">"id"</span> <span class="hljs-comment"># [3, 2, 1, 4, 5]</span>
-</code></pre>
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">shuffle</span>:<span class="hljs-function"> -&gt;</span> u.shuffle @</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-27">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
-              </div>
-              <p>Sort the agentset by the agent’s <code>id</code>.</p>
-<pre><code>AS.shuffle();  AS.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [3, 2, 1, 4, 5]</span>
-AS.sortById(); AS.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [1, 2, 3, 4, 5]</span>
-</code></pre>
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">sortById</span>:<span class="hljs-function"> -&gt;</span> u.sortBy @, <span class="hljs-string">"id"</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-28">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <p>Make a copy of an agentset, return as new agentset.<br>
 NOTE: does <em>not</em> duplicate the objects, simply creates a new agentset
@@ -555,7 +507,41 @@ as.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [
 </code></pre>
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">clone</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-property">@asSet</span> u.clone @</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">clone</span>: <span class="hljs-function">-&gt;</span> <span class="hljs-property">@asSet</span> u.clone @</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <p>Return the last agent in the agentset</p>
+<pre><code>AS.last().id             <span class="hljs-comment"># l5</span>
+l=AS.last(); p=[l.x,l.y] <span class="hljs-comment"># [1,1]</span>
+</code></pre>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">last</span>: <span class="hljs-function">-&gt;</span> u.last @</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p>Returns true if the agentset has any agents</p>
+<pre><code>AS.any()  <span class="hljs-comment"># true</span>
+AS.getPropWith(<span class="hljs-string">"x"</span>, <span class="hljs-number">99</span>).any() <span class="hljs-comment">#false</span>
+</code></pre>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">any</span>: <span class="hljs-function">-&gt;</span> u.any @</pre></div></div>
             
         </li>
         
@@ -565,40 +551,6 @@ as.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-29">&#182;</a>
-              </div>
-              <p>Return the last agent in the agentset</p>
-<pre><code>AS.last().id             <span class="hljs-comment"># l5</span>
-l=AS.last(); p=[l.x,l.y] <span class="hljs-comment"># [1,1]</span>
-</code></pre>
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">last</span>:<span class="hljs-function"> -&gt;</span> u.last @</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-30">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
-              </div>
-              <p>Returns true if the agentset has any agents</p>
-<pre><code>AS.any()  <span class="hljs-comment"># true</span>
-AS.getPropWith(<span class="hljs-string">"x"</span>, <span class="hljs-number">99</span>).any() <span class="hljs-comment">#false</span>
-</code></pre>
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">any</span>:<span class="hljs-function"> -&gt;</span> u.any @</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-31">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Return an agentset without given agent a</p>
 <pre><code>as = AS.clone().other(AS[<span class="hljs-number">0</span>])
@@ -611,27 +563,27 @@ as.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [
         </li>
         
         
-        <li id="section-32">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p>Return random agent in agentset</p>
 <pre><code>AS.oneOf()  <span class="hljs-comment"># {id:2,x:6,y:4}</span>
 </code></pre>
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">oneOf</span>:<span class="hljs-function"> -&gt;</span> u.oneOf @</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">oneOf</span>: <span class="hljs-function">-&gt;</span> u.oneOf @</pre></div></div>
             
         </li>
         
         
-        <li id="section-33">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p>Return agentset made of n distinct agents</p>
 <pre><code>AS.nOf(<span class="hljs-number">3</span>) <span class="hljs-comment"># [{id:0,x:0,y:1}, {id:4,x:1,y:1}, {id:1,x:8,y:0}]</span>
@@ -643,18 +595,18 @@ as.getProp <span class="hljs-string">"id"</span>  <span class="hljs-comment"># [
         </li>
         
         
-        <li id="section-34">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p>Return agent when f(o) min/max in agentset. If multiple agents have
 min/max value, return the first. Error if agentset empty.
 If f is a string, return element with min/max value of that property.
 If “valueToo” then return an array of the agent and the value.</p>
 <pre><code>AS.minOneOf(<span class="hljs-string">"x"</span>) <span class="hljs-comment"># {id:0,x:0,y:1}</span>
-AS.maxOneOf<span class="hljs-function"><span class="hljs-params">((a)-&gt;a.x+a.y, <span class="hljs-literal">true</span>)</span> # {<span class="hljs-title">id</span>:2,<span class="hljs-title">x</span>:6,<span class="hljs-title">y</span>:4},10</span>
+AS.maxOneOf(<span class="hljs-function"><span class="hljs-params">(a)</span>-&gt;</span>a.x+a.y, <span class="hljs-literal">true</span>) <span class="hljs-comment"># {id:2,x:6,y:4},10</span>
 </code></pre>
             </div>
             
@@ -664,11 +616,11 @@ AS.maxOneOf<span class="hljs-function"><span class="hljs-params">((a)-&gt;a.x+a.
         </li>
         
         
-        <li id="section-35">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <h3 id="drawing">Drawing</h3>
 
@@ -677,11 +629,11 @@ AS.maxOneOf<span class="hljs-function"><span class="hljs-params">((a)-&gt;a.x+a.
         </li>
         
         
-        <li id="section-36">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p>For agentsets who’s agents have a <code>draw</code> method.
 Clears the graphics context (transparent), then
@@ -695,28 +647,28 @@ calls each agent’s draw(ctx) method.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p>Show/Hide all of an agentset or breed.
 To show/hide an individual object, set its prototype: o.hidden = bool</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">show</span>:<span class="hljs-function"> -&gt;</span> o.hidden = <span class="hljs-literal">false</span> <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> @; <span class="hljs-property">@draw</span>(<span class="hljs-property">@model</span>.contexts[<span class="hljs-property">@name</span>])
-  <span class="hljs-attribute">hide</span>:<span class="hljs-function"> -&gt;</span> o.hidden = <span class="hljs-literal">true</span> <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> @; <span class="hljs-property">@draw</span>(<span class="hljs-property">@model</span>.contexts[<span class="hljs-property">@name</span>])</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="hljs-attribute">show</span>: <span class="hljs-function">-&gt;</span> o.hidden = <span class="hljs-literal">false</span> <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> @; <span class="hljs-property">@draw</span>(<span class="hljs-property">@model</span>.contexts[<span class="hljs-property">@name</span>])
+  <span class="hljs-attribute">hide</span>: <span class="hljs-function">-&gt;</span> o.hidden = <span class="hljs-literal">true</span> <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> @; <span class="hljs-property">@draw</span>(<span class="hljs-property">@model</span>.contexts[<span class="hljs-property">@name</span>])</pre></div></div>
             
         </li>
         
         
-        <li id="section-38">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <h3 id="topology">Topology</h3>
 
@@ -725,13 +677,15 @@ To show/hide an individual object, set its prototype: o.hidden = bool</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
-              <p>For patches &amp; agents, which have x,y. See Util doc.</p>
+              <p>For patches &amp; agents, which have x,y. See Util doc.
+Typically a subclass uses a rect/quadtree array to minimize
+the size, then uses asSet(array) to call inRadius or inCone</p>
 <p>Return all agents in agentset within d distance from given object.
 By default excludes the given object. Uses linear/torus distance
 depending on patches.isTorus, and patches width/height if needed.</p>
@@ -751,11 +705,11 @@ depending on patches.isTorus, and patches width/height if needed.</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <p>As above, but also limited to the angle <code>cone</code> around
 a <code>heading</code> from object <code>o</code>.</p>
@@ -776,11 +730,11 @@ a <code>heading</code> from object <code>o</code>.</p>
         </li>
         
         
-        <li id="section-41">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <h3 id="debugging">Debugging</h3>
 
@@ -789,11 +743,11 @@ a <code>heading</code> from object <code>o</code>.</p>
         </li>
         
         
-        <li id="section-42">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>Useful in console.
 Also see <a href="http://goo.gl/1i7bd">CoffeeConsole</a> Chrome extension.</p>
@@ -803,11 +757,11 @@ Also see <a href="http://goo.gl/1i7bd">CoffeeConsole</a> Chrome extension.</p>
         </li>
         
         
-        <li id="section-43">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>Similar to NetLogo ask &amp; with operators.
 Allows functions as strings. Use:</p>
@@ -829,17 +783,17 @@ myModel.agents.<span class="hljs-reserved">with</span>(<span class="hljs-string"
         </li>
         
         
-        <li id="section-44">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>The example agentset AS used in the code fragments was made like this,
 slightly more useful than shown above due to the toString method.</p>
 <pre><code><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">XY</span></span>
   <span class="hljs-attribute">constructor</span>: <span class="hljs-function"><span class="hljs-params">(<span class="hljs-property">@x</span>,<span class="hljs-property">@y</span>)</span> -&gt;</span>
-  <span class="hljs-attribute">toString</span>:<span class="hljs-function"> -&gt;</span> <span class="hljs-string">"{id:<span class="hljs-subst">#{<span class="hljs-property">@id</span>}</span>,x:<span class="hljs-subst">#{<span class="hljs-property">@x</span>}</span>,y:<span class="hljs-subst">#{<span class="hljs-property">@y</span>}</span>}"</span>
+  <span class="hljs-attribute">toString</span>: <span class="hljs-function">-&gt;</span> <span class="hljs-string">"{id:<span class="hljs-subst">#{<span class="hljs-property">@id</span>}</span>,x:<span class="hljs-subst">#{<span class="hljs-property">@x</span>}</span>,y:<span class="hljs-subst">#{<span class="hljs-property">@y</span>}</span>}"</span>
 <span class="hljs-property">@AS</span> = <span class="hljs-keyword">new</span> ABM.AgentSet <span class="hljs-comment"># @ =&gt; global name space</span>
 </code></pre><p>The result of</p>
 <pre><code>AS.add <span class="hljs-keyword">new</span> XY(u.randomInt(<span class="hljs-number">10</span>), u.randomInt(<span class="hljs-number">10</span>)) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> [<span class="hljs-number">1.</span><span class="hljs-number">.5</span>]

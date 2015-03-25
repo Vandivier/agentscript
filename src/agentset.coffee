@@ -89,7 +89,11 @@ class AgentSet extends Array
     @
 
   # Set the default value of an agent class, return agentset
-  setDefault: (name, value) -> @agentClass::[name] = value; @
+  setDefault: (name, value) ->
+    if name.match(/color/i) and u.isArray value
+      value = ColorMaps.Rgb.findClosestColor value...
+    @agentClass::[name] = value # ; @
+  getDefault: (name) -> @agentClass::[name]
   # Declare variables of an agent class.
   # Vars = a string of space separated names or an array of name strings
   # Return agentset.
@@ -115,34 +119,6 @@ class AgentSet extends Array
     breeds = breeds.split(" ")
     @asSet (o for o in @ when o.breed.name not in breeds)
 
-  # A generalized, but complex, flood fill, designed to work on any
-  # agentset type. To see a simpler version, look at the gridpath model.
-  #
-  # Floodfill arguments:
-  #
-  # * aset: initial array of agents, often a single agent: [a]
-  # * fCandidate(a, asetLast) -> true if a is elegible to be added to the set
-  # * fJoin(a, asetLast) -> adds a to the agentset, often by setting a variable
-  # * fNeighbors(a) -> returns the neighbors of this agent
-  # * asetLast: the array of the last set of agents to join the flood.
-  floodFill: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
-    floodFunc = @floodFillOnce(aset, fCandidate, fJoin, fNeighbors, asetLast)
-    floodFunc = floodFunc() while floodFunc
-
-  # Move one step forward in a floodfill.
-  # floodFillOnce() returns a function that performs the next step of the flood.
-  # This is useful if you want to watch your flood progress as an animation.
-  floodFillOnce: (aset, fCandidate, fJoin, fNeighbors, asetLast=[]) ->
-    fJoin p, asetLast for p in aset
-    asetNext = []
-    for p in aset
-      for n in fNeighbors(p) when fCandidate n, aset
-        asetNext.push n if asetNext.indexOf(n) < 0
-    if asetNext.length is 0
-      null
-    else
-      () => @floodFillOnce asetNext, fCandidate, fJoin, fNeighbors, aset
-
   # Remove adjacent duplicates, by reference, in a sorted agentset.
   # Use `sortById` first if agentset not sorted.
   #
@@ -155,7 +131,7 @@ class AgentSet extends Array
 
   # The static `ABM.AgentSet.asSet` as a method.
   # Used by agentset methods creating new agentsets.
-  asSet: (a, setType = @) -> AgentSet.asSet a, setType # setType = AgentSet
+  asSet: (a, setType = AgentSet) -> AgentSet.asSet a, setType # setType = AgentSet
 
   # Similar to above but sorted via `id`.
   asOrderedSet: (a) -> @asSet(a).sortById()
@@ -276,6 +252,8 @@ class AgentSet extends Array
 # ### Topology
 
   # For patches & agents, which have x,y. See Util doc.
+  # Typically a subclass uses a rect/quadtree array to minimize
+  # the size, then uses asSet(array) to call inRadius or inCone
   #
   # Return all agents in agentset within d distance from given object.
   # By default excludes the given object. Uses linear/torus distance

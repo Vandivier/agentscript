@@ -13,18 +13,19 @@
         @patches.usePixels() # 57+fps
         # @patches.cacheAgentsHere() # 28-9fps, not needed * overhead
         # two: 57+fps, fast patches get us to max
-        
+
 
         # globals
         @population = 100
         @diffusionRate = .70
         @coolingRate = .10
         @speed = .5
-        
+
         @anim.setRate 30, true
-        
+
         # defaults
         @agents.setDefault "size", 1.5
+        @agents.setDefault "useSprites", true
 
         @agents.create @population
         # @agents.create @population, (a) => # fat arrow for @patches etc
@@ -33,6 +34,8 @@
           p.heat = 0
       step: ->
         console.log @anim.toString() if @anim.ticks % 100 is 0
+        # Show the sprite sheet if there is one after first draw
+        @showSpriteSheet() if @anim.draws is 2
         for p in @patches
           p.heat *= (1-@coolingRate)
         for a in @agents

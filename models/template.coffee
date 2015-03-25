@@ -14,8 +14,8 @@
 #
 # below, which passes all its arguments to `Model`
 
- # ABM.Util, ABM.Shapes aliases
-u = ABM.Util; Shapes = ABM.Shapes
+# ABM.Util, ABM.Shapes, ABM.ColorMaps aliases
+u = ABM.Util; Shapes = ABM.Shapes; Maps = ABM.ColorMaps
 log = (arg) -> console.log arg
 class MyModel extends ABM.Model
   # `startup` initializes resources used by `setup` and `step`.
@@ -51,7 +51,7 @@ class MyModel extends ABM.Model
     @wiggle = u.degToRad(30) # degrees/radians to wiggle
     @startCircle = true  # initialize agents randomly or in circle
 
-    # Set the default agent size (conserves storage)
+    # Set the default agent size; save storage over setting size for each agent
     @agents.setDefault "size", @size
     # Set the agent to convert shape to bitmap for better performance.
     @agents.setUseSprites()
@@ -64,9 +64,9 @@ class MyModel extends ABM.Model
     # our model needs. In this case, we set the built-in color to a
     # random gray value.
     for p in @patches
-      p.color = u.randomGray()
-      # Set x,y axes different color, use [0,0,0,0] for transparent pixel test
-      p.color = [255,0,0] if p.x is 0 or p.y is 0
+      p.color = Maps.randomGray(0,100)
+      # Set x,y axes different color
+      p.color = "blue" if p.x is 0 or p.y is 0
 
     # Our empty @agents AgentSet will have been created.  Here we
     # add `population` Agents we use in our model.
@@ -88,6 +88,7 @@ class MyModel extends ABM.Model
     for s in Shapes.names()
       num = @agents.getPropWith("shape", s).length
       log "#{num} #{s}"
+    console.log "Patch(0,0): ", @patches.patchXY 0,0
 
   # Update our model via the second abstract method, `step`
   step: ->  # called by Model.animate
@@ -105,11 +106,9 @@ class MyModel extends ABM.Model
       @setSpotlight null if @anim.ticks is 600
     else
       @refreshPatches = false
-    if @anim.draws is 2 # Show the sprite sheet if there is one after first draw
-      sheet = u.last(Shapes.spriteSheets) if Shapes.spriteSheets.length isnt 0
-      if sheet?
-        log sheet
-        document.getElementById("play").appendChild(sheet.canvas)
+    # Show the sprite sheet if there is one after first draw
+    @showSpriteSheet() if @anim.draws is 2
+    # Print out the animator stats every 100 steps
     log @anim.toString() if @anim.ticks % 100 is 0
     # Stop the animation at 1000. Restart by `ABM.model.start()` in console.
     if @anim.ticks is 1000
@@ -126,8 +125,9 @@ class MyModel extends ABM.Model
     a.forward @speed
   updatePatches: (p) -> # p is patch
     # Update patch colors to be a random gray.
-    # Note we modify the existing color, GC minimization.
-    u.randomGray(p.color) if p.x isnt 0 and p.y isnt 0 # aviod GC, reuse color
+    # u.randomGray(p.color) if p.x isnt 0 and p.y isnt 0 # aviod GC, reuse color
+    # Avoid Garbage collection by using a colormap
+    p.color = Maps.randomColor() if p.x isnt 0 and p.y isnt 0
   reportInfo: ->
     # Report the average heading, in radians and degrees
     headings = @agents.getProp "heading"
