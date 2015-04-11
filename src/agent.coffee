@@ -194,14 +194,14 @@ class Agent
       init(a); a # Important: init called after object inserted in agent set
 
   # Return the members of the given agentset that are within radius distance
-  # from me, and within cone radians of my heading using patch topology
-  inRadius: (aset, radius, meToo=false) ->
-    aset.inRadius @p, radius, meToo # REMIND: @p vs @?
+  # from me, using patch topology
+  inRadius: (aset, radius) ->
+    aset.inRadius(@, radius)
 
-  # Return the members of the given agentset that are within radius distance
-  # from me, and within cone radians of my heading using patch topology
-  inCone: (aset, cone, radius, meToo=false) ->
-    aset.inCone @p, @heading, cone, radius, meToo # REMIND: @p vs @?
+  # Return the members of the given agentset that are within distance
+  # from me, and within angle radians of my heading using patch topology
+  inCone: (aset, distance, angle) ->
+    aset.inCone @, distance, angle, @heading
 
   # Return true if world coordinate falls on agent sprite
   hitTest: (x, y) ->

@@ -34,8 +34,9 @@ class MyModel extends ABM.Model
       console.log "This prevents two user defined image shapes from loading!"
       console.log "Use http:// protocol to enable image shapes."
     else
-      Shapes.add "cc", true, u.importImage("data/coffee.png")
+      Shapes.add "cup", true, u.importImage("data/coffee.png")
       Shapes.add "redfish", false, u.importImage("data/redfish64t.png")
+      Shapes.add "twitter", false, u.importImage("data/twitter.png")
 
   # Initialize our model via the `setup` abstract method.
   # This model simply creates `population` agents with
@@ -46,7 +47,7 @@ class MyModel extends ABM.Model
   # Most instance variables are parameters we would like
   # an external UI to setup for us.
     @population = 100
-    @size = 1.5   # size in patch coords
+    @size = 2.0   # size in patch coords
     @speed = .5   # move forward this amount in patch coords
     @wiggle = u.degToRad(30) # degrees/radians to wiggle
     @startCircle = true  # initialize agents randomly or in circle
@@ -109,7 +110,7 @@ class MyModel extends ABM.Model
     # Show the sprite sheet if there is one after first draw
     @showSpriteSheet() if @anim.draws is 2
     # Print out the animator stats every 100 steps
-    log @anim.toString() if @anim.ticks % 100 is 0
+    # log @anim.toString() if @anim.ticks % 100 is 0
     # Stop the animation at 1000. Restart by `ABM.model.start()` in console.
     if @anim.ticks is 1000
       log "..stopping, restart by app.start()"

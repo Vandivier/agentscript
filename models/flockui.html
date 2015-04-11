@@ -46,13 +46,14 @@
 
       step: ->
         if @useConsole and @anim.ticks % 25 is 0
-          console.log @anim.toString(), "flock alignment: #{@reportFlockVectorSize()}"
+          # console.log @anim.toString(), "flock alignment: #{@reportFlockVectorSize()}"
+          console.log "flock alignment: #{@reportFlockVectorSize()}"
         # Show the sprite sheet if there is one after first draw
         @showSpriteSheet() if @anim.draws is 2
         @flock(a) for a in @agents
 
       flock: (a) -> # a is agent
-        flockmates = @agents.inRadius a, @vision
+        flockmates = @agents.inRadius(a, @vision).other(a)
         if flockmates.length isnt 0
           [nearestNeighbor, d] = u.minOneOf flockmates, ((f) -> f.distance a), true
           if d < @minSeparation

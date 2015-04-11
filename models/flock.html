@@ -26,7 +26,7 @@
         # @agents.setUseSprites() # 24 -> 36
         @agents.setDefault "useSprites", true
 
-        # @anim.setRate 30, true # multistep
+        @anim.setRate 15, true, false # multistep, noRAF
 
         @useConsole = true
         @population = 500     # agents
@@ -43,14 +43,16 @@
         #a.color = u.randomMapColor() for a in @agents
 
       step: ->
-        if @useConsole and @anim.ticks % 25 is 0
-          console.log @anim.toString(), "flock alignment: #{@reportFlockVectorSize()}"
+        if @useConsole and @anim.ticks % 100 is 0
+          console.log "flock alignment: #{@reportFlockVectorSize()}"
         # Show the sprite sheet if there is one after first draw
         @showSpriteSheet() if @anim.draws is 2
         @flock(a) for a in @agents
 
       flock: (a) -> # a is agent
-        flockmates = @agents.inRadius a, @vision
+        # These two forms are identical
+        # flockmates = @agents.inRadius(a, @vision).other(a)
+        flockmates = a.inRadius(@agents, @vision).other(a)
         if flockmates.length isnt 0
           [nearestNeighbor, d] = u.minOneOf flockmates, ((f) -> f.distance a), true
           if d < @minSeparation
