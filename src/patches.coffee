@@ -32,16 +32,15 @@ class Patches extends AgentSet
     @setNeighbors() if @hasNeighbors
     @setPixels() if @model.div? # setup off-page canvas for pixel ops
 
-  # Have patches cache the agents currently on them.
-  # Optimizes p.agentsHere method.
-  # Call before first agent is created.
-  cacheAgentsHere: -> p.agents = [] for p in @; null
+  # Have patches cache the turtles currently on them.
+  # Optimizes p.turtlesHere method.
+  # Call before first turtle is created.
+  cacheTurtlesHere: -> p.turtles = [] for p in @; null
 
   # Draw patches using scaled image of colors. Note anti-aliasing may occur
   # if browser does not support smoothing flags.
   usePixels: (@drawWithPixels=true) ->
-    ctx = @model.contexts.patches
-    u.setCtxSmoothing ctx, not @drawWithPixels
+    u.deprecated "Patches.usePixels: pixels always used (color.pixel)"
 
   # Optimization: Cache a single set by modeler for use by patchRect,
   # inCone, inRect, inRadius.  Ex: flock demo model's vision rect.
@@ -61,14 +60,17 @@ class Patches extends AgentSet
   # Setup pixels used for `drawScaledPixels` and `importColors`
   #
   setPixels: ->
+    ctx = @model.contexts.patches
+    u.setCtxSmoothing ctx, false # crisp rendering # not @drawWithPixels
     if @size is 1
-    then @usePixels(); @pixelsCtx = @model.contexts.patches
+    # then @usePixels(); @pixelsCtx = @model.contexts.patches
+    then @pixelsCtx = ctx
     else @pixelsCtx = u.createCtx @numX, @numY
     @pixelsImageData = @pixelsCtx.getImageData(0, 0, @numX, @numY)
     @pixelsData = @pixelsImageData.data
-    if @pixelsData instanceof Uint8Array # Check for typed arrays
-      @pixelsData32 = new Uint32Array @pixelsData.buffer
-      @pixelsAreLittleEndian = u.isLittleEndian()
+    # if @pixelsData instanceof Uint8Array # Check for typed arrays
+    @pixelsData32 = new Uint32Array @pixelsData.buffer
+    # @pixelsAreLittleEndian = u.isLittleEndian()
 
   # Draw patches.  Three cases:
   #
@@ -76,8 +78,10 @@ class Patches extends AgentSet
   # * Monochrome: just fill canvas w/ patch default
   # * Otherwise: just draw each patch individually
   draw: (ctx) ->
-    if @monochrome then u.fillCtx ctx, @agentClass::color
-    else if @drawWithPixels then @drawScaledPixels ctx else super ctx
+    if @monochrome
+    then u.fillCtx ctx, @agentClass::color
+    else @drawScaledPixels ctx
+    # else if @drawWithPixels then @drawScaledPixels ctx else super ctx
 
 # #### Patch grid coord system utilities:
 
@@ -161,22 +165,22 @@ class Patches extends AgentSet
           pnext = @patchXY x, y # much faster than coord()
           rect.push pnext if (meToo or p isnt pnext)
     @asSet rect
-  # Return all the agents contained in the patchRect.
-  agentsOnRect: (p, dx, dy=dx) ->
-    @agentsOnPatches @patchRect(p, dx, dy, true)
-  agentsOnPatches: (patches) ->
+  # Return all the turtles contained in the patchRect.
+  turtlesOnRect: (p, dx, dy=dx) ->
+    @turtlesOnPatches @patchRect(p, dx, dy, true)
+  turtlesOnPatches: (patches) ->
     array = []
     if patches.length isnt 0
-      u.error "agentsInPatches: no cached agents." if not patches[0].agents?
+      u.error "agentsInPatches: no cached turtles." if not patches[0].turtles?
       # Use push.apply, not concat, see:
       # [jsPerf](http://jsperf.com/apply-push-vs-concat-array)
-      Array.prototype.push.apply(array, p.agents) for p in patches
+      Array.prototype.push.apply(array, p.turtles) for p in patches
     @asSet array
-  # Return all the unique patches the agentset or agent is on.
+  # Return all the unique patches the agentset or turtle is on.
   patchesOf: (aset) ->
     return @asSet([aset.p ? aset]) unless aset.length?
     @asSet( ((a.p ? a) for a in aset) ).sortById().uniq()
-  agentsOf: (aset) -> @agentsOnPatches(@patchesOf(aset))
+  turtlesOf: (aset) -> @turtlesOnPatches(@patchesOf(aset))
 
   # Draws, or "imports" an image URL into the drawing layer.
   # The image is scaled to fit the drawing layer.
@@ -233,27 +237,11 @@ class Patches extends AgentSet
     # not 1, pixel ops don't use transform but @size>1 uses
     # a drawimage
     u.setIdentity ctx if @size isnt 1
-    if @pixelsData32? then @drawScaledPixels32 ctx else @drawScaledPixels8 ctx
+    @drawScaledPixels32 ctx
     ctx.restore() if @size isnt 1
-  # The 8-bit version for drawScaledPixels.  Used for systems w/o typed arrays
-  drawScaledPixels8: (ctx) ->
-    data = @pixelsData
-    for p in @
-      i = @pixelByteIndex p; c = p.color
-      a = if c.length is 4 then c[3] else 255
-      data[i+j] = c[j] for j in [0..2]; data[i+3] = a
-    @pixelsCtx.putImageData @pixelsImageData, 0, 0
-    return if @size is 1
-    ctx.drawImage @pixelsCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height
-  # The 32-bit version of drawScaledPixels, with both little and big endian hardware.
   drawScaledPixels32: (ctx) ->
     data = @pixelsData32
-    for p in @
-      i = @pixelWordIndex p; c = p.color
-      a = if c.length is 4 then c[3] else 255
-      if @pixelsAreLittleEndian
-      then data[i] = (a << 24) | (c[2] << 16) | (c[1] << 8) | c[0]
-      else data[i] = (c[0] << 24) | (c[1] << 16) | (c[2] << 8) | a
+    data[p.id] = p.color.pixel for p in @
     @pixelsCtx.putImageData @pixelsImageData, 0, 0
     return if @size is 1
     ctx.drawImage @pixelsCtx.canvas, 0, 0, ctx.canvas.width, ctx.canvas.height
@@ -267,22 +255,13 @@ class Patches extends AgentSet
     unless @[0]._diffuseNext?
       p._diffuseNext = 0 for p in @
     # pass 1: calculate contribution of all patches to themselves and neighbors
-    # if cMap
-    #   minVal = Infinity; maxVal = -Infinity
-    #   unless cMap.scaleColor?
-    #     u.deprecated "Patch.diffuse: convert to ColorMap usage, using Jet"
-    #     cMap = ColorMaps.Jet
     for p in @
       dv = p[v]*rate; dv8 = dv/8; nn = p.n.length
       p._diffuseNext += p[v] - dv + (8-nn)*dv8
       n._diffuseNext += dv8 for n in p.n
-      # if cMap
-      #   minVal = Math.min minVal, p[v]
-      #   maxVal = Math.max maxVal, p[v]
     # pass 2: set new value for all patches, zero temp, modify color if c given
     for p in @
       p[v] = p._diffuseNext
       p._diffuseNext = 0
       p.color = ColorMaps.scaleColor color, p[v] if color?
-
     null # avoid returning copy of @
